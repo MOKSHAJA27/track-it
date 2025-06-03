@@ -3,7 +3,7 @@ eventlet.monkey_patch()
 
 import os
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_login import LoginManager
 from flask_socketio import SocketIO
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -33,3 +33,18 @@ def create_app():
     return app
 
 app = create_app()
+
+# Route to serve manifest.json with correct MIME type
+@app.route('/manifest.json')
+def manifest():
+    return send_from_directory('static', 'manifest.json', mimetype='application/manifest+json')
+
+# You can add similar routes for icons or service workers if needed:
+@app.route('/static/<path:filename>')
+def static_files(filename):
+    return send_from_directory('static', filename)
+
+# Example route for root
+@app.route('/')
+def index():
+    return send_from_directory('static', 'index.html')
