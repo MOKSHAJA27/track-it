@@ -1,3 +1,6 @@
+import eventlet
+eventlet.monkey_patch()
+
 from app import app, socketio
 import routes              # noqa: F401 (registers routes)
 import websocket_handler   # noqa: F401 (registers websocket events)
