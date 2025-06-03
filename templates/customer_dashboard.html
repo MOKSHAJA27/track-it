@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Dashboard - TrackIt{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- ... stats cards ... -->
+
+    <!-- Orders Section -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Active Orders
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if active_orders and active_orders|length > 0 %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Vendor</th>
+                                        <th>Description</th>
+                                        <th>Status</th>
+                                        <th>Time</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in active_orders %}
+                                    <tr id="order-{{ order.id }}">
+                                        <td>
+                                            <strong class="text-primary">#TK{{ order.id }}</strong>
+                                        </td>
+                                        <td>
+                                            {% if order.vendor and order.vendor.vendor_profile.business_name %}
+                                                <div>
+                                                    <strong>{{ order.vendor.vendor_profile.business_name }}</strong>
+                                                    <br><small class="text-muted">{{ order.vendor.full_name }}</small>
+                                                    <br><small class="text-muted">{{ order.vendor.phone }}</small>
+                                                    <br><small class="text-muted">{{ order.vendor.address }}</small>
+                                                </div>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="order-description">
+                                                {{ order.order_description[:50] }}{% if order.order_description|length > 50 %}...{% endif %}
+                                            </div>
+                                            <small class="text-muted">
+                                                {{ order.window_time }} | {{ order.delivery_speed }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-dark text-white">
+                                                {{ order.status_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small>
+                                                {{ order.created_at_ist or '-' }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <button class="btn btn-sm btn-outline-primary" 
+                                                        onclick="viewOrderDetails({{ order.id }})">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-success" 
+                                                        onclick="showDeliveryQR({{ order.id }}, '{{ order.delivery_qr_code or '' }}')">
+                                                    <i class="fas fa-qrcode"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-truck fa-2x text-muted mb-3"></i>
+                            <p class="text-muted">No active orders</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Order History Table -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Order History
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if completed_orders and completed_orders|length > 0 %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Vendor</th>
+                                        <th>Description</th>
+                                        <th>Status</th>
+                                        <th>Delivered At</th>
+                                        <th>Amount</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in completed_orders %}
+                                    <tr id="order-{{ order.id }}">
+                                        <td><strong class="text-primary">#TK{{ order.id }}</strong></td>
+                                        <td>
+                                            {% if order.vendor and order.vendor.vendor_profile.business_name %}
+                                                <div>
+                                                    <strong>{{ order.vendor.vendor_profile.business_name }}</strong>
+                                                    <br><small class="text-muted">{{ order.vendor.full_name }}</small>
+                                                    <br><small class="text-muted">{{ order.vendor.phone }}</small>
+                                                    <br><small class="text-muted">{{ order.vendor.address }}</small>
+                                                </div>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="order-description">
+                                                {{ order.order_description[:50] }}{% if order.order_description|length > 50 %}...{% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success text-white">
+                                                {{ order.status_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small>
+                                                {{ order.delivered_at_ist or '-' }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            {% if order.final_amount %}
+                                                <strong class="text-success">₹{{ "%.0f"|format(order.final_amount) }}</strong>
+                                            {% elif order.estimated_amount %}
+                                                <span class="text-muted">₹{{ "%.0f"|format(order.estimated_amount) }}</span>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" 
+                                                    onclick="viewOrderDetails({{ order.id }})">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-history fa-2x text-muted mb-3"></i>
+                            <p class="text-muted">No order history yet</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if (not active_orders or active_orders|length == 0) and (not completed_orders or completed_orders|length == 0) %}
+    <div class="text-center py-5">
+        <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">No orders yet</h5>
+        <p class="text-muted">Start by placing your first order</p>
+        <a href="{{ url_for('create_order') }}" class="btn btn-primary">
+            <i class="fas fa-plus-circle me-2"></i>Place First Order
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Modals should be INSIDE the content block! -->
+    <!-- Order Details Modal -->
+    <div class="modal fade" id="orderDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Order Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="orderDetailsContent">
+                    <!-- Content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delivery QR Modal -->
+    <div class="modal fade" id="deliveryQRModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-qrcode me-2"></i>Delivery QR Code
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Show this QR code to the delivery partner
+                    </div>
+                    <div id="qrCodeContainer" class="mb-3">
+                        <!-- QR code will be displayed here -->
+                    </div>
+                    <p class="text-muted">
+                        <i class="fas fa-clock me-2"></i>This code is valid only at the time of delivery
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+window.viewOrderDetails = function(orderId) {
+    fetch(`/order/${orderId}/details`)
+        .then(resp => resp.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('orderDetailsContent').innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                return;
+            }
+            document.getElementById('orderDetailsContent').innerHTML = `
+                <div>
+                    <h5>Order #TK${data.id}</h5>
+                    <p><strong>Status:</strong> <span class="badge bg-dark">${data.status_display}</span></p>
+                    <p><strong>Description:</strong> ${data.order_description || "-"}</p>
+                    <p><strong>Vendor:</strong> ${data.vendor ? data.vendor.full_name : '-'}<br>
+                        <small>${data.vendor ? data.vendor.phone : ''} ${data.vendor ? "| " + data.vendor.address : ''}</small>
+                    </p>
+                    <p><strong>Window:</strong> ${data.window_time || "-"} | <strong>Speed:</strong> ${data.delivery_speed || "-"}</p>
+                    <p><strong>Created:</strong> ${data.created_at || "-"}</p>
+                    ${data.accepted_at ? `<p><strong>Accepted:</strong> ${data.accepted_at}</p>` : ''}
+                    ${data.delivered_at ? `<p><strong>Delivered:</strong> ${data.delivered_at}</p>` : ''}
+                    <p><strong>Amount:</strong> ₹${data.final_amount || data.estimated_amount || "-"}</p>
+                    ${data.package_qr_code ? `<p><strong>Package QR:</strong> <code>${data.package_qr_code}</code></p>` : ''}
+                    ${data.delivery_qr_code ? `<p><strong>Delivery QR:</strong> <code>${data.delivery_qr_code}</code></p>` : ''}
+                </div>
+            `;
+        })
+        .catch(() => {
+            document.getElementById('orderDetailsContent').innerHTML = `<div class="alert alert-danger">Failed to load order details.</div>`;
+        });
+    new bootstrap.Modal(document.getElementById('orderDetailsModal')).show();
+};
+
+window.showDeliveryQR = function(orderId, qrData) {
+    const qrContainer = document.getElementById('qrCodeContainer');
+    if (qrData) {
+        qrContainer.innerHTML = `
+            <div class="qr-code-display text-center">
+                <img src="/qr_image?data=${encodeURIComponent(qrData)}" alt="Delivery QR Code" style="width:220px;height:220px;">
+                <p class="mt-2 mb-0 small">Delivery QR for Order #TK${orderId}</p>
+                <code class="small">${qrData}</code>
+            </div>
+        `;
+    } else {
+        qrContainer.innerHTML = `<span class="text-danger">QR Code not available</span>`;
+    }
+    new bootstrap.Modal(document.getElementById('deliveryQRModal')).show();
+};
+
+// Use the already-created socket from base.html
+if (window.socket) {
+    window.socket.emit('join_room');
+    window.socket.on('order_status_update', function(data) {
+        location.reload();
+    });
+} else {
+    console.error("Socket is not initialized! Make sure base.html loads it.");
+}
+</script>
+{% endblock %}

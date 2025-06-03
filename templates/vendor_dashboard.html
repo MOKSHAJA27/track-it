@@ -1,0 +1,496 @@
+{% extends "base.html" %}
+
+{% block title %}Vendor Dashboard - TrackIt{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="fw-bold">
+                <i class="fas fa-store me-2 text-success"></i>
+                Vendor Dashboard
+            </h2>
+            <p class="text-muted">Welcome {{ current_user.full_name }}!</p>
+            {% if current_user.vendor_profile %}
+                <div class="badge bg-success">{{ current_user.vendor_profile.business_name }}</div>
+            {% endif %}
+        </div>
+        <div class="col-md-4 text-md-end">
+            <div class="btn-group" role="group">
+                <button class="btn btn-outline-primary" onclick="window.refreshDashboard()">
+                    <i class="fas fa-sync-alt me-2"></i>Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm stat-card">
+                <div class="card-body text-center">
+                    <div class="stat-icon bg-warning text-white mb-3">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h4 class="fw-bold">{{ pending_orders|length }}</h4>
+                    <p class="text-muted mb-0">Pending Orders</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm stat-card">
+                <div class="card-body text-center">
+                    <div class="stat-icon bg-primary text-white mb-3">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <h4 class="fw-bold">{{ active_orders|length }}</h4>
+                    <p class="text-muted mb-0">Active Orders</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm stat-card">
+                <div class="card-body text-center">
+                    <div class="stat-icon bg-success text-white mb-3">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h4 class="fw-bold">{{ completed_orders|length }}</h4>
+                    <p class="text-muted mb-0">Completed Orders</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card border-0 shadow-sm stat-card">
+            <div class="card-body text-center">
+                <div class="stat-icon bg-info text-white mb-3">
+                    <i class="fas fa-rupee-sign"></i>
+                </div>
+                <h4 class="fw-bold">₹{{ "%.0f"|format((active_orders + completed_orders)|map(attribute='estimated_amount')|select|sum) }}</h4>
+                <p class="text-muted mb-0">Total Sales</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pending Orders Section -->
+    {% if pending_orders %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clock me-2"></i>Pending Orders
+                        <span class="badge bg-white text-warning ms-2">{{ pending_orders|length }}</span>
+                    </h5>
+                </div>
+                
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Description</th>
+                                    <th>Time</th>
+                                    <th>Priority</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in pending_orders %}
+                                <tr id="pending-order-{{ order.id }}">
+                                    <td>
+                                        <strong class="text-primary">#TK{{ order.id }}</strong>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong>{{ order.customer.full_name }}</strong>
+                                            <br><small class="text-muted">{{ order.customer.phone }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="order-description">
+                                            {{ order.order_description[:60] }}{% if order.order_description|length > 60 %}...{% endif %}
+                                        </div>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock me-1"></i>{{ order.window_time }} |
+                                            <i class="fas fa-shipping-fast me-1"></i>{{ order.delivery_speed }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <small>{{ order.formatted_created_at }}</small>
+                                    </td>
+                                    <td>
+                                        {% if order.delivery_speed == 'express' %}
+                                            <span class="badge bg-danger">Express</span>
+                                        {% elif '9am' in order.window_time %}
+                                            <span class="badge bg-warning">High</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Normal</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-success" 
+                                                    onclick="window.acceptOrder({{ order.id }})">
+                                                <i class="fas fa-check"></i> Accept
+                                            </button>
+                                            <button class="btn btn-sm btn-danger" 
+                                                    onclick="window.rejectOrder({{ order.id }})">
+                                                <i class="fas fa-times"></i> Reject
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-primary" 
+                                                    onclick="window.viewOrderDetails({{ order.id }})">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Active Orders Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-truck me-2"></i>Active Orders
+                        <span class="badge bg-white text-primary ms-2">{{ active_orders|length }}</span>
+                    </h5>
+                </div>
+                
+                <div class="card-body p-0">
+                    {% if active_orders %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Status</th>
+                                        <th>Delivery Partner</th>
+                                        <th>QR Code</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in active_orders %}
+                                    <tr id="active-order-{{ order.id }}">
+                                        <td>
+                                            <strong class="text-primary">#TK{{ order.id }}</strong>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <strong>{{ order.customer.full_name }}</strong>
+                                                <br><small class="text-muted">{{ order.customer.address[:30] }}...</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-dark text-white">
+                                                {{ order.status_display }}
+                                            </span>
+                                            <br><small class="text-muted">QR scans: {{ order.qr_scan_count }}/3</small>
+                                        </td>
+                                        <td>
+                                            {% if order.delivery_partner %}
+                                                <div>
+                                                    <strong>{{ order.delivery_partner.full_name }}</strong>
+                                                    <br><small class="text-muted">{{ order.delivery_partner.phone }}</small>
+                                                </div>
+                                            {% else %}
+                                                <span class="text-muted">Not Assigned</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <!-- Always show the Show QR button, fallback to a text if not available -->
+                                            <button class="btn btn-sm btn-outline-dark"
+                                                onclick="window.showPackageQR({{ order.id }}, '{{ order.package_qr_code or '' }}', '{{ order.package_qr_image or '' }}')">
+                                                <i class="fas fa-qrcode"></i> Show QR
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" 
+                                                    onclick="window.viewOrderDetails({{ order.id }})">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-truck fa-2x text-muted mb-3"></i>
+                            <p class="text-muted">No active orders</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Completed Orders -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-check-circle me-2"></i>Recent Completed Orders
+                    </h5>
+                </div>
+                
+                <div class="card-body p-0">
+                    {% if completed_orders %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Status</th>
+                                        <th>Completed</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in completed_orders %}
+                                    <tr>
+                                        <td>
+                                            <strong class="text-primary">#TK{{ order.id }}</strong>
+                                        </td>
+                                        <td>
+                                            <strong>{{ order.customer.full_name }}</strong>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-dark text-white">
+                                                {{ order.status_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small>
+                                                {{ order.formatted_delivered_at if order.formatted_delivered_at else order.formatted_created_at }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            {% if order.final_amount %}
+                                                <strong class="text-success">₹{{ "%.0f"|format(order.final_amount) }}</strong>
+                                            {% elif order.estimated_amount %}
+                                                <span class="text-muted">₹{{ "%.0f"|format(order.estimated_amount) }}</span>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle fa-2x text-muted mb-3"></i>
+                            <p class="text-muted">No completed orders yet</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Package QR Modal -->
+<div class="modal fade" id="packageQRModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-qrcode me-2"></i>Package QR Code
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Attach this QR code to the package
+                </div>
+                <div id="packageQRContainer" class="mb-3">
+                    <!-- QR code will be displayed here -->
+                </div>
+                <p class="text-muted">
+                    <i class="fas fa-truck me-2"></i>Delivery partner will scan this code
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Order Details Modal -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Order Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="orderDetailsContent">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+window.acceptOrder = function(orderId) {
+    if (!confirm('Do you want to accept this order?')) {
+        return;
+    }
+    fetch(`/order/${orderId}/accept`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.showAlert('Order accepted!', 'success');
+            const row = document.getElementById(`pending-order-${orderId}`);
+            if (row) { row.remove(); }
+            setTimeout(() => { location.reload(); }, 1500);
+        } else {
+            window.showAlert(data.error || 'Error accepting order', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        window.showAlert('Network error', 'error');
+    });
+};
+
+window.rejectOrder = function(orderId) {
+    if (!confirm('Do you want to reject this order?')) {
+        return;
+    }
+    fetch(`/order/${orderId}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.showAlert('Order rejected', 'warning');
+            const row = document.getElementById(`pending-order-${orderId}`);
+            if (row) { row.remove(); }
+        } else {
+            window.showAlert(data.error || 'Error rejecting order', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        window.showAlert('Network error', 'error');
+    });
+};
+
+window.showPackageQR = function(orderId, qrData, qrImg) {
+    const qrContainer = document.getElementById('packageQRContainer');
+    if (qrImg && qrImg.startsWith('data:image')) {
+        qrContainer.innerHTML = `
+            <div class="qr-code-display">
+                <img src="${qrImg}" alt="Package QR Code" style="width:300px; height:300px; border:8px solid #ddd; background:#fff;">
+                <p class="mt-2 mb-0 small">Package QR for Order #TK${orderId}</p>
+                <code class="small">${qrData}</code>
+            </div>
+        `;
+    } else if (qrData) {
+        qrContainer.innerHTML = `
+            <div class="qr-code-display">
+                <img src="/qr_image?data=${encodeURIComponent(qrData)}" alt="Package QR Code" style="width:220px;height:220px;">
+                <p class="mt-2 mb-0 small">Package QR for Order #TK${orderId}</p>
+                <code class="small">${qrData}</code>
+            </div>
+        `;
+    } else {
+        qrContainer.innerHTML = `<span class="text-danger">QR Code not available</span>`;
+    }
+    new bootstrap.Modal(document.getElementById('packageQRModal')).show();
+};
+
+window.viewOrderDetails = function(orderId) {
+    document.getElementById('orderDetailsContent').innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status"></div>
+        </div>
+    `;
+    new bootstrap.Modal(document.getElementById('orderDetailsModal')).show();
+
+    fetch(`/order/${orderId}/details`)
+        .then(resp => resp.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('orderDetailsContent').innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                return;
+            }
+            document.getElementById('orderDetailsContent').innerHTML = `
+                <div>
+                    <h5>Order #TK${data.id}</h5>
+                    <p><strong>Status:</strong> <span class="badge bg-dark">${data.status_display}</span></p>
+                    <p><strong>Description:</strong> ${data.order_description || "-"}</p>
+                    <p><strong>Customer:</strong> ${data.customer ? data.customer.full_name : '-'}<br>
+                        <small>${data.customer ? data.customer.phone : ''} ${data.customer ? "| " + data.customer.address : ''}</small>
+                    </p>
+                    <p><strong>Delivery Partner:</strong> ${data.delivery_partner ? data.delivery_partner.full_name : 'Not Assigned'}<br>
+                        <small>${data.delivery_partner ? data.delivery_partner.phone : ''}</small>
+                    </p>
+                    <p><strong>Window:</strong> ${data.window_time || "-"} | <strong>Speed:</strong> ${data.delivery_speed || "-"}</p>
+                    <p><strong>Created:</strong> ${data.created_at || "-"}</p>
+                    ${data.accepted_at ? `<p><strong>Accepted:</strong> ${data.accepted_at}</p>` : ''}
+                    ${data.delivered_at ? `<p><strong>Delivered:</strong> ${data.delivered_at}</p>` : ''}
+                    <p><strong>Amount:</strong> ₹${data.final_amount || data.estimated_amount || "-"}</p>
+                    ${data.package_qr_code ? `<p><strong>Package QR:</strong> <code>${data.package_qr_code}</code></p>` : ''}
+                </div>
+            `;
+        })
+        .catch(() => {
+            document.getElementById('orderDetailsContent').innerHTML = `<div class="alert alert-danger">Failed to load order details.</div>`;
+        });
+};
+
+window.refreshDashboard = function() {
+    location.reload();
+};
+
+window.showAlert = function(message, type) {
+    const alertClass = type === 'error' ? 'danger' : type;
+    const alertHtml = `
+        <div class="alert alert-${alertClass} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    const container = document.querySelector('.container');
+    container.insertAdjacentHTML('afterbegin', alertHtml);
+};
+
+// Use the already-created socket from base.html
+// Do NOT redeclare or shadow the socket variable, just use window.socket directly
+if (window.socket) {
+    window.socket.emit('join_room');
+    window.socket.on('order_status_update', function(data) {
+        location.reload();
+    });
+} else {
+    console.error("Socket is not initialized! Make sure base.html loads it.");
+}
+</script>
+{% endblock %}

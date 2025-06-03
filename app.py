@@ -1,0 +1,32 @@
+import os
+from dotenv import load_dotenv
+from flask import Flask
+from flask_login import LoginManager
+from flask_socketio import SocketIO
+from werkzeug.middleware.proxy_fix import ProxyFix
+from supabase import create_client, Client
+
+# Load environment variables
+load_dotenv()
+
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+login_manager = LoginManager()
+socketio = SocketIO()
+
+def create_app():
+    app = Flask(__name__)
+    app.secret_key = os.getenv("SESSION_SECRET", "dev-secret-key")
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+
+    login_manager.init_app(app)
+    socketio.init_app(app, cors_allowed_origins="*")
+    login_manager.login_view = 'login'
+    login_manager.login_message = 'कृपया लॉगिन करें। Please log in to access this page.'
+    login_manager.login_message_category = 'info'
+
+    return app
+
+app = create_app()

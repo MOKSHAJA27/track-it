@@ -1,0 +1,429 @@
+{% extends "base.html" %}
+
+{% block title %}Create New Order - TrackIt{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-lg-8 mx-auto">
+            <h2 class="text-center fw-bold">
+                <i class="fas fa-plus-circle me-2 text-primary"></i>Create New Order
+            </h2>
+            <p class="text-center text-muted">Place a new order with our vendors</p>
+        </div>
+    </div>
+
+    <!-- AI Recommendations (if available) -->
+    {% if predictions %}
+    <div class="row mb-4">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-success shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-brain me-2"></i>AI Recommendations
+                        <span class="badge bg-white text-success ms-2">5 Successful Orders</span>
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <h6 class="text-success">Suggested Window Time</h6>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-success me-2">{{ predictions.window_description }}</span>
+                                <small class="text-muted">{{ predictions.window_confidence_percent }}% confidence</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-success">Suggested Delivery Speed</h6>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-success me-2">{{ predictions.speed_description }}</span>
+                                <small class="text-muted">{{ predictions.speed_confidence_percent }}% confidence</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button type="button" class="btn btn-sm btn-success" onclick="applyAISuggestions()">
+                            <i class="fas fa-magic me-2"></i>Apply AI Suggestions
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% elif current_user.successful_orders < 5 %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Need {{ 5 - current_user.successful_orders }} more successful orders for AI recommendations.</strong>
+                <small>Need {{ 5 - current_user.successful_orders }} more successful orders for AI recommendations.</small>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Order Form -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shopping-cart me-2"></i>Order Details
+                    </h5>
+                </div>
+
+                <div class="card-body">
+                    <form method="POST" id="orderForm">
+                        <!-- Vendor Selection -->
+                        <div class="mb-4">
+                            <label for="vendor_id" class="form-label fw-bold">
+                                <i class="fas fa-store me-2"></i>Select Vendor <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="vendor_id" name="vendor_id" required onchange="updateOrderSummary()">
+                                <option value="">-- Select Vendor --</option>
+                                {% for vendor in vendors %}
+                                    <option value="{{ vendor.id }}" 
+                                            data-business-type="{{ vendor.business_type }}"
+                                            data-address="{{ vendor.address }}"
+                                            data-phone="{{ vendor.phone }}">
+                                        {{ vendor.business_name }} - {{ vendor.business_type }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">Choose your preferred vendor</small>
+                            
+                            <!-- Vendor Info Display -->
+                            <div id="vendorInfo" class="mt-3" style="display: none;">
+                                <div class="card bg-light border-0">
+                                    <div class="card-body p-3">
+                                        <h6 class="mb-2">Vendor Information</h6>
+                                        <div id="vendorDetails"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order Description -->
+                        <div class="mb-4">
+                            <label for="order_description" class="form-label fw-bold">
+                                <i class="fas fa-list me-2"></i>Order Description <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" id="order_description" name="order_description" rows="4" 
+                                      placeholder="Describe your order in detail..." required oninput="updateOrderSummary()"></textarea>
+                            <small class="text-muted">Provide detailed description of your order</small>
+                        </div>
+
+                        <!-- Window Time Selection -->
+                        <div class="mb-4">
+                            <label for="window_time" class="form-label fw-bold">
+                                <i class="fas fa-clock me-2"></i>Delivery Window <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="window_time" name="window_time" required onchange="updateOrderSummary(); updateCost()">
+                                <option value="">-- Select Time Window --</option>
+                                <option value="9am-12pm">9 AM - 12 PM (Morning)</option>
+                                <option value="12pm-4pm">12 PM - 4 PM (Afternoon)</option>
+                                <option value="4pm-9pm">4 PM - 9 PM (Evening)</option>
+                                <option value="9pm-9am">9 PM - 9 AM (Night/Early Morning)</option>
+                            </select>
+                            <small class="text-muted">Choose your preferred delivery time window</small>
+                        </div>
+
+                        <!-- Delivery Speed Selection -->
+                        <div class="mb-4">
+                            <label for="delivery_speed" class="form-label fw-bold">
+                                <i class="fas fa-shipping-fast me-2"></i>Delivery Speed <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="delivery_speed" name="delivery_speed" required onchange="updateOrderSummary(); updateCost()">
+                                <option value="">-- Select Delivery Speed --</option>
+                                <option value="express">Express - Same Day Delivery (+₹50)</option>
+                                <option value="regular">Regular - 1-7 Days (Standard Rate)</option>
+                            </select>
+                            <small class="text-muted">Choose delivery speed based on your urgency</small>
+                        </div>
+
+                        <!-- Cost Summary -->
+                        <div class="mb-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="fw-bold">Cost Summary</h6>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <small>Base Cost:</small>
+                                            <div class="fw-bold">₹<span id="baseCost">100</span></div>
+                                        </div>
+                                        <div class="col-6">
+                                            <small>Speed Charge:</small>
+                                            <div class="fw-bold" id="speedCharge">₹0</div>
+                                        </div>
+                                        <div class="col-12 mt-2 pt-2 border-top">
+                                            <small>Total Estimated Cost:</small>
+                                            <div class="h5 text-primary" id="totalCost">₹100</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order Summary -->
+                        <div class="mb-4">
+                            <div class="card border-info">
+                                <div class="card-header bg-info text-white">
+                                    <h6 class="mb-0">Order Summary</h6>
+                                </div>
+                                <div class="card-body" id="orderSummary">
+                                    <p class="text-muted">Summary will appear here after filling the form</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Terms and Conditions -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="terms" required>
+                                <label class="form-check-label" for="terms">
+                                    I understand this order is subject to vendor approval and agree to <a href="#" class="text-decoration-none">terms and conditions</a>.
+                                    <small class="text-muted">I understand this order is subject to vendor approval and agree to terms and conditions.</small>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane me-2"></i>Place Order
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Placement Tips -->
+    <div class="row mt-4">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Order Placement Tips
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <h6 class="text-info">For Better Description:</h6>
+                            <ul class="small">
+                                <li>Mention exact quantities (kg/grams/pieces)</li>
+                                <li>Specify brand preferences if any</li>
+                                <li>Mention quality requirements</li>
+                                <li>Include color/size specifications</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-info">Delivery Options:</h6>
+                            <ul class="small">
+                                <li>Express for urgent deliveries (same day)</li>
+                                <li>Regular for standard delivery (1-7 days)</li>
+                                <li>Choose appropriate time windows</li>
+                                <li>Night delivery available for convenience</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// AI prediction data
+const predictions = {% if predictions %}{{ predictions|tojson }}{% else %}null{% endif %};
+
+// Vendor selection handler
+document.getElementById('vendor_id').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const vendorInfo = document.getElementById('vendorInfo');
+    const vendorDetails = document.getElementById('vendorDetails');
+    
+    if (selectedOption.value) {
+        const businessType = selectedOption.dataset.businessType;
+        const address = selectedOption.dataset.address;
+        const phone = selectedOption.dataset.phone;
+        
+        vendorDetails.innerHTML = `
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <small class="text-muted">Business Type:</small>
+                    <div class="fw-semibold">${businessType}</div>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted">Phone:</small>
+                    <div class="fw-semibold">${phone}</div>
+                </div>
+                <div class="col-12">
+                    <small class="text-muted">Address:</small>
+                    <div class="fw-semibold">${address}</div>
+                </div>
+            </div>
+        `;
+        vendorInfo.style.display = 'block';
+    } else {
+        vendorInfo.style.display = 'none';
+    }
+    
+    updateOrderSummary();
+});
+
+function applyAISuggestions() {
+    if (!predictions) return;
+
+    // Apply window time suggestion
+    const windowSelect = document.getElementById('window_time');
+    const speedSelect = document.getElementById('delivery_speed');
+
+    // Map AI predictions to form values
+    let windowValue = predictions.window_time;
+    let speedValue = predictions.delivery_speed;
+
+    if (windowValue) {
+        windowSelect.value = windowValue;
+    }
+
+    if (speedValue) {
+        speedSelect.value = speedValue;
+    }
+
+    updateOrderSummary();
+    updateCost();
+}
+
+function updateCost() {
+    const deliverySpeed = document.getElementById('delivery_speed').value;
+    let baseCost = 100;
+    let speedCharge = 0;
+
+    if (deliverySpeed === 'express') {
+        speedCharge = 50;
+    }
+
+    const total = baseCost + speedCharge;
+
+    document.getElementById('baseCost').textContent = baseCost;
+    const speedChargeElement = document.getElementById('speedCharge');
+    const totalCostElement = document.getElementById('totalCost');
+
+    speedChargeElement.textContent = speedCharge >= 0 ? `+₹${speedCharge}` : `₹${speedCharge}`;
+    speedChargeElement.className = speedCharge >= 0 ? 'fw-bold' : 'fw-bold text-success';
+    totalCostElement.textContent = `₹${total}`;
+}
+
+function updateOrderSummary() {
+    const vendorSelect = document.getElementById('vendor_id');
+    const description = document.getElementById('order_description').value;
+    const windowTime = document.getElementById('window_time').value;
+    const deliverySpeed = document.getElementById('delivery_speed').value;
+    const summaryElement = document.getElementById('orderSummary');
+
+    if (!vendorSelect.value || !description || !windowTime || !deliverySpeed) {
+        summaryElement.innerHTML = `
+            <p class="text-muted">Summary will appear here after filling the form</p>
+        `;
+        return;
+    }
+
+    const vendorName = vendorSelect.options[vendorSelect.selectedIndex].text;
+    const windowTimeText = getWindowTimeText(windowTime);
+    const deliverySpeedText = getDeliverySpeedText(deliverySpeed);
+
+    summaryElement.innerHTML = `
+        <div class="summary-content">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <h6 class="text-primary">Vendor:</h6>
+                    <p class="mb-1">${vendorName}</p>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-primary">Delivery Window:</h6>
+                    <p class="mb-1">${windowTimeText}</p>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-primary">Delivery Speed:</h6>
+                    <p class="mb-1">${deliverySpeedText}</p>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-primary">Order Items:</h6>
+                    <p class="mb-1">${description.substring(0, 50)}${description.length > 50 ? '...' : ''}</p>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function getWindowTimeText(value) {
+    const options = {
+        '9am-12pm': '9 AM - 12 PM (Morning)',
+        '12pm-4pm': '12 PM - 4 PM (Afternoon)',
+        '4pm-9pm': '4 PM - 9 PM (Evening)',
+        '9pm-9am': '9 PM - 9 AM (Night/Early Morning)'
+    };
+    return options[value] || value;
+}
+
+function getDeliverySpeedText(value) {
+    const options = {
+        'express': 'Express - Same Day Delivery',
+        'regular': 'Regular - 1-7 Days'
+    };
+    return options[value] || value;
+}
+
+// Form submission with double-submit prevention
+document.getElementById('orderForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    // Disable the submit button to prevent double submission
+    const submitBtn = this.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.disabled = true;
+
+    const formData = new FormData(this);
+
+    fetch('/create_order', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.text();
+        }
+        throw new Error('Network response was not ok');
+    })
+    .then(data => {
+        // Check if response is a redirect (successful order placement)
+        if (data.includes('customer_dashboard') || data.includes('Customer Dashboard')) {
+            window.location.href = '/customer_dashboard';
+        } else {
+            // If it's the same page, there might be an error
+            document.body.innerHTML = data;
+            // Re-enable the button if there was an error, so user can try again
+            if (submitBtn) submitBtn.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error placing order. Please try again.');
+        if (submitBtn) submitBtn.disabled = false;
+    });
+});
+
+// Form field change handlers
+['window_time', 'order_description'].forEach(fieldId => {
+    document.getElementById(fieldId).addEventListener('change', updateOrderSummary);
+});
+
+// Initialize cost calculation
+updateCost();
+</script>
+{% endblock %}

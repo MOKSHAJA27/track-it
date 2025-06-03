@@ -1,0 +1,231 @@
+
+{% extends "base.html" %}
+
+{% block title %}TrackIt - Real-time Order Tracking{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <div class="row align-items-center min-vh-100">
+            <div class="col-lg-6">
+                <div class="hero-content">
+                    <h1 class="display-4 fw-bold mb-4 text-primary">
+                        TrackIt
+                    </h1>
+                    <p class="lead mb-4 text-muted">
+                        Real-time order tracking system with QR code integration
+                    </p>
+                    
+                    <div class="features-list mb-5">
+                        <div class="feature-item">
+                            <i class="fas fa-qrcode text-primary me-3"></i>
+                            <span>QR Code-based Tracking</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-bolt text-success me-3"></i>
+                            <span>Real-time Updates</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-users text-warning me-3"></i>
+                            <span>Multi-role Management</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-mobile-alt text-info me-3"></i>
+                            <span>Mobile Responsive</span>
+                        </div>
+                    </div>
+                    
+                    {% if not current_user.is_authenticated %}
+                        <div class="cta-buttons">
+                            <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg me-3">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
+                            </a>
+                            <a href="{{ url_for('register') }}" class="btn btn-outline-primary btn-lg">
+                                <i class="fas fa-user-plus me-2"></i>Register
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="welcome-section">
+                            <div class="alert alert-success border-0 shadow-sm">
+                                <h5 class="alert-heading">
+                                    <i class="fas fa-user-check me-2"></i>Welcome, {{ current_user.full_name }}!
+                                </h5>
+                                <p class="mb-2">Role: <strong>{{ current_user.role.title() }}</strong></p>
+                                <hr>
+                                <div class="d-flex gap-2">
+                                    {% if current_user.role == 'customer' %}
+                                        <a href="{{ url_for('customer_dashboard') }}" class="btn btn-success">
+                                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                                        </a>
+                                        <a href="{{ url_for('create_order') }}" class="btn btn-outline-success">
+                                            <i class="fas fa-plus-circle me-1"></i>New Order
+                                        </a>
+                                    {% elif current_user.role == 'vendor' %}
+                                        <a href="{{ url_for('vendor_dashboard') }}" class="btn btn-success">
+                                            <i class="fas fa-store me-1"></i>Vendor Dashboard
+                                        </a>
+                                    {% elif current_user.role == 'delivery_partner' %}
+                                        <a href="{{ url_for('delivery_dashboard') }}" class="btn btn-success">
+                                            <i class="fas fa-motorcycle me-1"></i>Delivery Dashboard
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="hero-visual text-center">
+                    <div class="tracking-demo">
+                        <div class="tracking-card">
+                            <h5 class="mb-3"><i class="fas fa-box me-2"></i>Order #TK12345</h5>
+                            <div class="tracking-progress">
+                                <div class="progress-step active">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Pending</span>
+                                </div>
+                                <div class="progress-step active">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Accepted</span>
+                                </div>
+                                <div class="progress-step active">
+                                    <i class="fas fa-truck"></i>
+                                    <span>In Transit</span>
+                                </div>
+                                <div class="progress-step">
+                                    <i class="fas fa-home"></i>
+                                    <span>Delivered</span>
+                                </div>
+                            </div>
+                            <div class="qr-demo mt-3">
+                                <i class="fas fa-qrcode"></i>
+                                <span>Scan QR Code</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<section class="features-section py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="fw-bold">Key Features</h2>
+                <p class="text-muted">Simple and efficient order tracking</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-users fa-3x text-primary"></i>
+                    </div>
+                    <h5>Three User Roles</h5>
+                    <p class="text-muted">Separate dashboards for customers, vendors, and delivery partners</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-bolt fa-3x text-warning"></i>
+                    </div>
+                    <h5>Real-time Updates</h5>
+                    <p class="text-muted">Live status updates through WebSocket connections</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-qrcode fa-3x text-success"></i>
+                    </div>
+                    <h5>QR Code Tracking</h5>
+                    <p class="text-muted">Easy package tracking with QR code scanning</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="fw-bold">How It Works</h2>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="step-card text-center">
+                    <div class="step-number">1</div>
+                    <i class="fas fa-shopping-cart fa-2x text-primary mb-3"></i>
+                    <h6>Place Order</h6>
+                    <p class="small text-muted">Select vendor and provide order details</p>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="step-card text-center">
+                    <div class="step-number">2</div>
+                    <i class="fas fa-check-circle fa-2x text-success mb-3"></i>
+                    <h6>Acceptance</h6>
+                    <p class="small text-muted">Vendor accepts and processes the order</p>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="step-card text-center">
+                    <div class="step-number">3</div>
+                    <i class="fas fa-qrcode fa-2x text-warning mb-3"></i>
+                    <h6>QR Tracking</h6>
+                    <p class="small text-muted">Delivery partner scans QR codes</p>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="step-card text-center">
+                    <div class="step-number">4</div>
+                    <i class="fas fa-home fa-2x text-info mb-3"></i>
+                    <h6>Delivery</h6>
+                    <p class="small text-muted">Package delivered to customer</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Demo animation for tracking progress
+function animateTracking() {
+    const steps = document.querySelectorAll('.progress-step');
+    let currentStep = 0;
+    
+    setInterval(() => {
+        steps.forEach(step => step.classList.remove('active'));
+        
+        for (let i = 0; i <= currentStep; i++) {
+            if (steps[i]) {
+                steps[i].classList.add('active');
+            }
+        }
+        
+        currentStep = (currentStep + 1) % steps.length;
+    }, 2000);
+}
+
+// Start animation when page loads
+document.addEventListener('DOMContentLoaded', animateTracking);
+</script>
+{% endblock %}
