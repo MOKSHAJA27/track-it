@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}पंजीकरण Register - TrackIt{% endblock %}
+{% block title %}Register - TrackIt{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -10,7 +10,7 @@
                 <div class="card-header bg-success text-white text-center py-4">
                     <h3 class="mb-0">
                         <i class="fas fa-user-plus me-2"></i>
-                        पंजीकरण करें<br>
+                        Register<br>
                         <small class="fs-6">Register with TrackIt</small>
                     </h3>
                 </div>
@@ -20,25 +20,25 @@
                         <!-- Role Selection -->
                         <div class="mb-4">
                             <label class="form-label fw-semibold">
-                                <i class="fas fa-user-tag me-2"></i>भूमिका चुनें Select Role
+                                <i class="fas fa-user-tag me-2"></i>Select Role
                             </label>
                             <div class="row g-2">
                                 <div class="col-md-4">
                                     <input type="radio" class="btn-check" name="role" id="customer" value="customer" checked>
                                     <label class="btn btn-outline-primary w-100" for="customer">
-                                        <i class="fas fa-user me-2"></i><br>ग्राहक<br><small>Customer</small>
+                                        <i class="fas fa-user me-2"></i><br>Customer
                                     </label>
                                 </div>
                                 <div class="col-md-4">
                                     <input type="radio" class="btn-check" name="role" id="vendor" value="vendor">
                                     <label class="btn btn-outline-success w-100" for="vendor">
-                                        <i class="fas fa-store me-2"></i><br>विक्रेता<br><small>Vendor</small>
+                                        <i class="fas fa-store me-2"></i><br>Vendor
                                     </label>
                                 </div>
                                 <div class="col-md-4">
                                     <input type="radio" class="btn-check" name="role" id="delivery_partner" value="delivery_partner">
                                     <label class="btn btn-outline-warning w-100" for="delivery_partner">
-                                        <i class="fas fa-motorcycle me-2"></i><br>डिलीवरी<br><small>Delivery</small>
+                                        <i class="fas fa-motorcycle me-2"></i><br>Delivery Partner
                                     </label>
                                 </div>
                             </div>
@@ -48,13 +48,13 @@
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label for="username" class="form-label fw-semibold">
-                                    <i class="fas fa-user me-2"></i>उपयोगकर्ता नाम Username
+                                    <i class="fas fa-user me-2"></i>Username
                                 </label>
                                 <input type="text" class="form-control" id="username" name="username" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="email" class="form-label fw-semibold">
-                                    <i class="fas fa-envelope me-2"></i>ईमेल Email
+                                    <i class="fas fa-envelope me-2"></i>Email
                                 </label>
                                 <input type="email" class="form-control" id="email" name="email" required>
                             </div>
@@ -62,23 +62,23 @@
                         
                         <div class="mb-3">
                             <label for="full_name" class="form-label fw-semibold">
-                                <i class="fas fa-id-card me-2"></i>पूरा नाम Full Name
+                                <i class="fas fa-id-card me-2"></i>Full Name
                             </label>
                             <input type="text" class="form-control" id="full_name" name="full_name" required 
-                                   placeholder="उदाहरण: आरव मेहता / Aarav Mehta">
+                                   placeholder="e.g., Aarav Mehta">
                         </div>
                         
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label for="phone" class="form-label fw-semibold">
-                                    <i class="fas fa-phone me-2"></i>फोन नंबर Phone
+                                    <i class="fas fa-phone me-2"></i>Phone
                                 </label>
                                 <input type="tel" class="form-control" id="phone" name="phone" required 
                                        placeholder="+91 9876543210">
                             </div>
                             <div class="col-md-6">
                                 <label for="password" class="form-label fw-semibold">
-                                    <i class="fas fa-lock me-2"></i>पासवर्ड Password
+                                    <i class="fas fa-lock me-2"></i>Password
                                 </label>
                                 <input type="password" class="form-control" id="password" name="password" required>
                             </div>
@@ -86,40 +86,40 @@
                         
                         <div class="mb-3">
                             <label for="address" class="form-label fw-semibold">
-                                <i class="fas fa-map-marker-alt me-2"></i>पता Address
+                                <i class="fas fa-map-marker-alt me-2"></i>Address
                             </label>
                             <textarea class="form-control" id="address" name="address" rows="3" required 
-                                      placeholder="फ्लैट/हाउस नंबर, इलाका, शहर - पिनकोड / Flat/House No, Area, City - Pincode"></textarea>
+                                      placeholder="Flat/House No, Area, City - Pincode"></textarea>
                         </div>
                         
                         <!-- Vendor Specific Fields -->
                         <div id="vendorFields" style="display: none;">
                             <div class="card bg-light border-success mb-3">
                                 <div class="card-header bg-success text-white">
-                                    <h6 class="mb-0">व्यापारी विवरण Vendor Details</h6>
+                                    <h6 class="mb-0">Vendor Details</h6>
                                 </div>
                                 <div class="card-body">
                                     <div class="row g-3">
                                         <div class="col-md-6">
                                             <label for="business_name" class="form-label fw-semibold">
-                                                <i class="fas fa-store me-2"></i>व्यापार का नाम Business Name
+                                                <i class="fas fa-store me-2"></i>Business Name
                                             </label>
                                             <input type="text" class="form-control" id="business_name" name="business_name" 
-                                                   placeholder="उदाहरण: श्री गणेश मार्ट">
+                                                   placeholder="e.g., Ganesh Mart">
                                         </div>
                                         <div class="col-md-6">
                                             <label for="business_type" class="form-label fw-semibold">
-                                                <i class="fas fa-tags me-2"></i>व्यापार प्रकार Business Type
+                                                <i class="fas fa-tags me-2"></i>Business Type
                                             </label>
                                             <select class="form-select" id="business_type" name="business_type">
-                                                <option value="">चुनें Select</option>
-                                                <option value="Groceries">किराना Groceries</option>
-                                                <option value="Restaurant">रेस्टोरेंट Restaurant</option>
-                                                <option value="Fresh Produce">ताज़ी सब्जी Fresh Produce</option>
-                                                <option value="Electronics">इलेक्ट्रॉनिक्स Electronics</option>
-                                                <option value="Clothing">कपड़े Clothing</option>
-                                                <option value="Medicine">दवाई Medicine</option>
-                                                <option value="Other">अन्य Other</option>
+                                                <option value="">Select</option>
+                                                <option value="Groceries">Groceries</option>
+                                                <option value="Restaurant">Restaurant</option>
+                                                <option value="Fresh Produce">Fresh Produce</option>
+                                                <option value="Electronics">Electronics</option>
+                                                <option value="Clothing">Clothing</option>
+                                                <option value="Medicine">Medicine</option>
+                                                <option value="Other">Other</option>
                                             </select>
                                         </div>
                                     </div>
@@ -132,23 +132,22 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="terms" required>
                                 <label class="form-check-label" for="terms">
-                                    मैं <a href="#" class="text-decoration-none">नियम और शर्तों</a> से सहमत हूं।<br>
-                                    <small class="text-muted">I agree to the terms and conditions.</small>
+                                    I agree to the <a href="#" class="text-decoration-none">terms and conditions</a>.
                                 </label>
                             </div>
                         </div>
                         
                         <div class="d-grid mb-4">
                             <button type="submit" class="btn btn-success btn-lg">
-                                <i class="fas fa-user-plus me-2"></i>पंजीकरण करें Register
+                                <i class="fas fa-user-plus me-2"></i>Register
                             </button>
                         </div>
                     </form>
                     
                     <div class="text-center">
-                        <p class="text-muted mb-3">पहले से खाता है? Already have an account?</p>
+                        <p class="text-muted mb-3">Already have an account?</p>
                         <a href="{{ url_for('login') }}" class="btn btn-outline-primary">
-                            <i class="fas fa-sign-in-alt me-2"></i>लॉगिन करें Login
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
                         </a>
                     </div>
                 </div>
@@ -207,161 +206,17 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (!phoneRegex.test(phone)) {
             e.preventDefault();
-            alert('कृपया वैध फोन नंबर दर्ज करें। Please enter a valid phone number in format: +91 XXXXXXXXXX');
+            alert('Please enter a valid phone number in format: +91 XXXXXXXXXX');
             return false;
         }
         
         const password = document.getElementById('password').value;
         if (password.length < 6) {
             e.preventDefault();
-            alert('पासवर्ड कम से कम 6 अक्षर का होना चाहिए। Password must be at least 6 characters.');
+            alert('Password must be at least 6 characters.');
             return false;
         }
     });
 });
-</script>
-{% endblock %}
-{% extends "base.html" %}
-
-{% block title %}Register - TrackIt{% endblock %}
-
-{% block content %}
-<div class="container">
-    <div class="row justify-content-center py-5">
-        <div class="col-md-6">
-            <div class="card border-0 shadow">
-                <div class="card-body p-5">
-                    <div class="text-center mb-4">
-                        <h3 class="fw-bold text-primary">Create Account</h3>
-                        <p class="text-muted">Join TrackIt to start tracking orders</p>
-                    </div>
-                    
-                    <form method="POST" class="needs-validation" novalidate>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="full_name" class="form-label">Full Name</label>
-                                <input type="text" class="form-control" id="full_name" name="full_name" required>
-                                <div class="invalid-feedback">Please enter your full name.</div>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="username" class="form-label">Username</label>
-                                <input type="text" class="form-control" id="username" name="username" required>
-                                <div class="invalid-feedback">Please choose a username.</div>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email Address</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
-                            <div class="invalid-feedback">Please enter a valid email address.</div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="phone" class="form-label">Phone Number</label>
-                                <input type="tel" class="form-control" id="phone" name="phone" required>
-                                <div class="invalid-feedback">Please enter your phone number.</div>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="role" class="form-label">Account Type</label>
-                                <select class="form-select" id="role" name="role" required onchange="toggleVendorFields()">
-                                    <option value="">Choose role...</option>
-                                    <option value="customer">Customer</option>
-                                    <option value="vendor">Vendor</option>
-                                    <option value="delivery_partner">Delivery Partner</option>
-                                </select>
-                                <div class="invalid-feedback">Please select an account type.</div>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="address" class="form-label">Address</label>
-                            <textarea class="form-control" id="address" name="address" rows="2" required></textarea>
-                            <div class="invalid-feedback">Please enter your address.</div>
-                        </div>
-                        
-                        <!-- Vendor specific fields -->
-                        <div id="vendor-fields" style="display: none;">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="business_name" class="form-label">Business Name</label>
-                                    <input type="text" class="form-control" id="business_name" name="business_name">
-                                </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    <label for="business_type" class="form-label">Business Type</label>
-                                    <select class="form-select" id="business_type" name="business_type">
-                                        <option value="">Select type...</option>
-                                        <option value="restaurant">Restaurant</option>
-                                        <option value="grocery">Grocery Store</option>
-                                        <option value="electronics">Electronics</option>
-                                        <option value="clothing">Clothing</option>
-                                        <option value="pharmacy">Pharmacy</option>
-                                        <option value="other">Other</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required minlength="6">
-                            <div class="invalid-feedback">Password must be at least 6 characters long.</div>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary w-100 mb-3">
-                            <i class="fas fa-user-plus me-1"></i> Create Account
-                        </button>
-                    </form>
-                    
-                    <div class="text-center">
-                        <p class="text-muted mb-0">Already have an account? 
-                            <a href="{{ url_for('login') }}" class="text-primary text-decoration-none">Login here</a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block extra_scripts %}
-<script>
-function toggleVendorFields() {
-    const role = document.getElementById('role').value;
-    const vendorFields = document.getElementById('vendor-fields');
-    const businessName = document.getElementById('business_name');
-    const businessType = document.getElementById('business_type');
-    
-    if (role === 'vendor') {
-        vendorFields.style.display = 'block';
-        businessName.required = true;
-        businessType.required = true;
-    } else {
-        vendorFields.style.display = 'none';
-        businessName.required = false;
-        businessType.required = false;
-    }
-}
-
-// Form validation
-(function() {
-    'use strict';
-    window.addEventListener('load', function() {
-        var forms = document.getElementsByClassName('needs-validation');
-        var validation = Array.prototype.filter.call(forms, function(form) {
-            form.addEventListener('submit', function(event) {
-                if (form.checkValidity() === false) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                form.classList.add('was-validated');
-            }, false);
-        });
-    }, false);
-})();
 </script>
 {% endblock %}
