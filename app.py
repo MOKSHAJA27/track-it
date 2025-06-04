@@ -27,7 +27,7 @@ def create_app():
     login_manager.init_app(app)
     socketio.init_app(app, cors_allowed_origins="*")
     login_manager.login_view = 'login'
-    login_manager.login_message = 'कृपया लॉगिन करें। Please log in to access this page.'
+    login_manager.login_message = 'Please log in to access this page.'
     login_manager.login_message_category = 'info'
 
     return app
@@ -43,8 +43,3 @@ def manifest():
 @app.route('/static/<path:filename>')
 def static_files(filename):
     return send_from_directory('static', filename)
-
-# Example route for root
-@app.route('/')
-def index():
-    return send_from_directory('static', 'index.html')
