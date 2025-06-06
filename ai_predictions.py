@@ -174,7 +174,7 @@ def get_ai_predictions(customer_id, vendor_id=None):
             window_descriptions = {
                 '9am-12pm': '9 AM - 12 PM (Morning)',
                 '12pm-4pm': '12 PM - 4 PM (Afternoon)',
-                '4pm-9pm': '4 PM - 9 PM (Evening)',
+                '5pm-9pm': '5 PM - 9 PM (Evening)',
                 '9pm-9am': '9 PM - 9 AM (Night/Early Morning)'
             }
             speed_descriptions = {
