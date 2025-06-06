@@ -433,7 +433,7 @@ def create_order():
             vendors = get_available_vendors()
             predictions = get_ai_predictions(current_user.id) if current_user.can_use_ai_predictions() else None
             return render_template('create_order.html', vendors=vendors, predictions=predictions)
-        if not window_time or window_time not in ['9am-12pm', '12pm-4pm', '4pm-9pm', '9pm-9am']:
+        if not window_time or window_time not in ['9am-12pm', '12pm-4pm', '5pm-9pm', '9pm-9am']:
             flash('Please select a valid delivery window.', 'error')
             vendors = get_available_vendors()
             predictions = get_ai_predictions(current_user.id) if current_user.can_use_ai_predictions() else None
